@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>HICOPK&CO</title>
+<style>
+/* Reset and base styles */
+body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  font-family: Arial, sans-serif;
+  background: black;
+  cursor: none; /* hide default cursor */
+}
+
+/* Canvas for particle background */
+.background-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: -1;
+}
+
+/* Custom cursor styles */
+.cursor {
+  position: fixed;
+  width: 4vw;
+  height: 4vw;
+  max-width: 18px;
+  max-height: 18px;
+  min-width: 8px;
+  min-height: 8px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #f5d7a1, #caa06a, #8a6a45, #4e3b28);
+  box-shadow: 0 0 6px rgba(255, 210, 150, 0.6);
+  pointer-events: none;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  will-change: transform;
+}
+.cursor::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 2vw;
+  height: 2vw;
+  max-width: 8px;
+  max-height: 8px;
+  min-width: 4px;
+  min-height: 4px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  filter: blur(1px);
+}
+
+/* Hamburger menu toggle button (hidden on large screens) */
+.menu-toggle {
+  display: none; /* default hidden, shown on mobile */
+}
+
+/* Navigation styles */
+#nav-menu {
+  display: flex;
+  justify-content: center;
+  padding: 1vh 2vw;
+  background: rgba(0, 0, 0, 0.3);
+  transition: max-height 0.5s ease, opacity 0.3s ease;
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  z-index: 999;
+  top: 0;
+}
+
+/* Desktop: horizontal menu fixed at top */
+@media(min-width: 769px){
+  #nav-menu {
+    flex-direction: row;
+    position: fixed;
+    top: 0;
+  }
+  /* Hide hamburger on desktop */
+  .menu-toggle {
+    display: none;
+  }
+}
+
+/* Mobile: fixed at top below hamburger, collapsible */
+@media(max-width: 768px){
+  #nav-menu {
+    flex-direction: column;
+    max-height: 0;
+    opacity: 0;
+    pointer-events: none;
+    top: 50px; /* below hamburger icon */
+    background: rgba(0, 0, 0, 0.3);
+  }
+  #nav-menu.show {
+    max-height: 2000px;
+    opacity: 1;
+    pointer-events: auto;
+  }
+  /* Show hamburger icon */
+  .menu-toggle {
+    display: block;
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+    font-size: 2em;
+    color: #fff;
+    background: rgba(0,0,0,0.5);
+    padding: 0.5em 1em;
+    border-radius: 4px;
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.3s ease;
+  }
+}
+
+/* Navigation links styles */
+nav a {
+  color: #fff;
+  margin: 0 20px;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 1.1em;
+  padding: 8px 12px;
+  border-radius: 4px;
+  transition: background 0.3s;
+}
+nav a:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Sections styling */
+section {
+  padding: 8vh 4vw 6vh 4vw;
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 5;
+  color: white;
+  text-align: center;
+}
+section h1 {
+  font-size: 4vw;
+  margin-bottom: 3vh;
+}
+section h2 {
+  font-size: 3vw;
+  margin-bottom: 3vh;
+}
+section p {
+  font-size: 1.2em;
+  line-height: 1.6;
+  max-width: 80vw;
+  margin: 0 auto;
+}
+
+/* Shop items styling */
+#shop-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4vw;
+  justify-content: center;
+}
+.shop-item {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 3vh 2vw;
+  border-radius: 8px;
+  width: 45vw;
+  max-width: 250px;
+  text-align: center;
+  transition: background 0.3s, transform 0.3s;
+}
+.shop-item:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.02);
+}
+.shop-item img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+}
+.shop-item h3 {
+  margin: 1vh 0 0.5vh 0;
+  font-size: 1.2em;
+}
+.shop-item p {
+  margin: 0.5vh 0 1vh 0;
+}
+.shop-item button {
+  background: #ffb347;
+  border: none;
+  padding: 0.5vh 1vw;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+.shop-item button:hover {
+  background: #ff8c00;
+}
+
+/* Portfolio section styles */
+#portfolio {
+  padding: 8vh 4vw 6vh 4vw;
+  background-color: rgba(0, 0, 0, 0.6);
+}
+#portfolio h2 {
+  margin-bottom: 4vh;
+  font-size: 3vw;
+}
+.project-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4vw;
+  justify-content: center;
+}
+.project-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  width: 45vw;
+  max-width: 350px;
+}
+.project {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.3s, background 0.3s;
+}
+.project:hover {
+  transform: scale(1.05);
+  background: rgba(255, 255, 255, 0.2);
+}
+.project img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.project-info {
+  padding: 2vh 2vw;
+}
+.project-info h3 {
+  margin-top: 0;
+  margin-bottom: 1vh;
+}
+.project-info p {
+  margin: 0;
+  font-size: 1em;
+}
+
+/* Contact styles */
+#contact {
+  padding: 8vh 4vw 6vh 4vw;
+  text-align: center;
+}
+#contact p {
+  font-size: 1.2em;
+  margin: 1vh 0;
+}
+
+/* Social Media Styles */
+#social-media {
+  padding: 6vh 4vw;
+  background-color: rgba(0, 0, 0, 0.6);
+  text-align: center;
+}
+#social-media h2 {
+  margin-bottom: 3vh;
+  font-size: 3vw;
+}
+.social-icons {
+  display: flex;
+  justify-content: center;
+  gap: 5vw;
+  flex-wrap: wrap;
+}
+.social-icons a {
+  display: inline-block;
+  width: 10vw;
+  max-width: 50px;
+  height: 10vw;
+  max-height: 50px;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.social-icons a:hover {
+  transform: scale(1.2);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.6);
+}
+.social-icons img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: invert(100%) grayscale(100%) brightness(100%) sepia(0%) saturate(0%) hue-rotate(0deg);
+}
+</style>
+</head>
+<body>
+
+<!-- Hamburger Menu for Mobile -->
+<div class="menu-toggle" id="menu-toggle" aria-label="Menu" aria-expanded="false" role="button" tabindex="0">
+  &#9776; <!-- Hamburger icon -->
+</div>
+
+<!-- Navigation -->
+<nav id="nav-menu">
+  <a href="#home">Home</a>
+  <a href="#about">About</a>
+  <a href="#shop">Shop</a>
+  <a href="#portfolio">Portfolio</a>
+  <a href="#contact">Contact</a>
+</nav>
+
+<!-- Custom Cursor Element -->
+<div class="cursor" id="custom-cursor"></div>
+
+<!-- Particle Canvas -->
+<canvas class="background-canvas" id="particle-canvas"></canvas>
+
+<!-- Sections -->
+<section id="home">
+  <h1>Welcome to HICOPK&CO</h1>
+  <p></p>
+</section>
+
+<section id="about">
+  <h2>About Us</h2>
+  <p>At HICOPK&CO, we are passionate about crafting digital experiences that stand out. Our expertise lies in designing highly interactive, visually stunning, and fluid mobile-first layouts that are tailored to capture attention and engage users across all devices. We believe that a seamless and aesthetically pleasing user interface is essential for building lasting connections with your audience.</p>
+<p>Our team is dedicated to producing highly accessible and search engine optimized code, following the most up-to-date modern web standards. This ensures that your website not only looks great but is also easy to find, navigate, and use by everyone, including those with disabilities. We prioritize performance, usability, and compliance to deliver websites that are both beautiful and functional.</p>
+<p>Beyond design and development, we focus on scaling targeted marketing campaigns aimed at amplifying organic growth. We understand the importance of building meaningful online visibility, and our strategies are tailored to increase your reach, attract quality traffic, and convert visitors into loyal customers. Whether you’re looking to enhance your brand presence or drive specific conversions, we craft customized solutions that align with your business goals.</p>
+<p>Partner with us to elevate your digital presence, create memorable user experiences, and achieve sustainable growth. At HICOPK&CO, we are committed to helping you succeed in a competitive online landscape.</p>
+</section>
+
+<section id="shop">
+  <h2>Shop</h2>
+  <div id="shop-items">
+    <div class="shop-item">
+      <img src="https://i.postimg.cc/hvrHG0Xp/DSCN0113.jpg" alt="Product 1" />
+      <h3>1 proxy link</h3>
+      <p>free</p>
+      <button>gmail or call me if you want to buy</button>
+    </div>
+    <div class="shop-item">
+      <img src="https://i.postimg.cc/hvrHG0Xp/DSCN0113.jpg" alt="Product 2" />
+      <h3>how to code a website (1on1 call)</h3>
+      <p>free-10$</p>
+      <button>gmail or call me if you want to buy</button>
+    </div>
+    <div class="shop-item">
+      <img src="https://i.postimg.cc/hvrHG0Xp/DSCN0113.jpg" alt="Product 3" />
+      <h3>how to code a proxy (1on1 call)</h3>
+      <p>free-10$</p>
+      <button>gmail or call me if you want to buy</button>
+    </div>
+    <div class="shop-item">
+      <img src="https://i.postimg.cc/hvrHG0Xp/DSCN0113.jpg" alt="Product 4" />
+      <h3>how to code in html css and js (1on1 call)</h3>
+      <p>free-10$</p>
+      <button>gmail or call me if you want to buy</button>
+    </div>
+  </div>
+</section>
+
+<!-- Portfolio Section with clickable links -->
+<section id="portfolio">
+  <h2>Our Websites Portfolio</h2>
+  <div class="project-grid">
+    <a href="https://hehe-rho-rust.vercel.app/" target="_blank" rel="noopener noreferrer" class="project-link">
+      <div class="project">
+        <img src="https://i.postimg.cc/hvrHG0Xp/DSCN0113.jpg" alt="Website 1" />
+        <div class="project-info">
+          <h3>pluto</h3>
+          <p>makeing your school day less boring (dose not work right now)</p>
+        </div>
+      </div>
+    </a>
+    <a href="https://the-best-og.vercel.app/" target="_blank" rel="noopener noreferrer" class="project-link">
+      <div class="project">
+        <img src="https://i.postimg.cc/hvrHG0Xp/DSCN0113.jpg" alt="Website 2" />
+        <div class="project-info">
+          <h3>101001</h3>
+          <p>the frist website we made</p>
+        </div>
+      </div>
+    </a>
+    <a href="https://www.google.com/" target="_blank" rel="noopener noreferrer" class="project-link">
+      <div class="project">
+        <img src="https://i.postimg.cc/hvrHG0Xp/DSCN0113.jpg" alt="Website 3" />
+        <div class="project-info">
+          <h3>the best</h3>
+          <p>the best website (dose not work right now)</p>
+        </div>
+      </div>
+    </a>
+  </div>
+</section>
+
+<!-- Contact Us -->
+<section id="contact">
+  <h2>Contact Us</h2>
+  <p>Feel free to reach out! Email: <a href="mailto:hicopkandco22@gmail.com" target="_blank" rel="noopener noreferrer">hicopkandco22@gmail.com</a></p>
+  <p>Feel free to reach out! call us: <a href="tel:8382189685" target="_blank" rel="noopener noreferrer">838-218-9685</a></p>
+  <p>Feel free to send us a text! <a href="sms:8382189685" target="_blank" rel="noopener noreferrer">838-218-9685</a></p>
+</section>
+
+<!-- Social Media Follow Us Section -->
+<section id="social-media">
+  <h2>Follow Us</h2>
+  <div class="social-icons">
+    <a href="https://x.com/hicopkandco?s=21" target="_blank" rel="noopener noreferrer" aria-label="X">
+      <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/x.svg" alt="X" />
+    </a>
+    <a href="https://www.instagram.com/hicopk.and.co.official?igsh=MTJpMXpjMGd5c2cxMg%3D%3D&utm_source=qr" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+      <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/instagram.svg" alt="Instagram" />
+    </a>
+    <a href="https://www.tiktok.com/@official.hicopkco?_r=1&_t=ZP-96xf2aKQblu" target="_blank" rel="noopener noreferrer" aria-label="TikTok">
+      <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/tiktok.svg" alt="TikTok" />
+    </a>
+  </div>
+</section>
+
+<script>
+  // --- Custom Cursor ---
+  const cursor = document.getElementById('custom-cursor');
+  let mouseX = 0, mouseY = 0;
+  let cursorX = 0, cursorY = 0;
+  document.addEventListener('mousemove', (e) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+  });
+  function animateCursor() {
+    cursorX += (mouseX - cursorX) * 0.2;
+    cursorY += (mouseY - cursorY) * 0.2;
+    cursor.style.transform = `translate3d(${cursorX}px, ${cursorY}px, 0)`;
+    requestAnimationFrame(animateCursor);
+  }
+  requestAnimationFrame(animateCursor);
+
+  // --- Particle Background ---
+  const canvas = document.getElementById('particle-canvas');
+  const ctx = canvas.getContext('2d');
+
+  let width = canvas.width = window.innerWidth;
+  let height = canvas.height = window.innerHeight;
+
+  window.addEventListener('resize', () => {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+  });
+
+  const PARTICLE_COUNT = Math.min(150, Math.floor(window.innerWidth / 10));
+  const particles = [];
+
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    particles.push({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      vx: (Math.random() - 0.5) * 1.5,
+      vy: (Math.random() - 0.5) * 1.5,
+      radius: Math.random() * 2 + 1
+    });
+  }
+
+  function animateParticles() {
+    ctx.clearRect(0, 0, width, height);
+    particles.forEach(p => {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(242, 229, 213, 0.8)';
+      ctx.fill();
+
+      p.x += p.vx;
+      p.y += p.vy;
+
+      if (p.x < 0 || p.x > width) p.vx = -p.vx;
+      if (p.y < 0 || p.y > height) p.vy = -p.vy;
+    });
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const p1 = particles[i], p2 = particles[j];
+        const dx = p1.x - p2.x;
+        const dy = p1.y - p2.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 120) {
+          ctx.strokeStyle = `rgba(242, 229, 213, ${1 - dist / 120})`;
+          ctx.beginPath();
+          ctx.moveTo(p1.x, p1.y);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(animateParticles);
+  }
+  animateParticles();
+
+  // --- Menu toggle logic ---
+  const menuToggle = document.getElementById('menu-toggle');
+  const navMenu = document.getElementById('nav-menu');
+
+  // Add accessibility attribute
+  menuToggle.setAttribute('aria-expanded', 'false');
+
+  menuToggle.addEventListener('click', () => {
+    const expanded = menuToggle.getAttribute('aria-expanded') === 'true';
+    menuToggle.setAttribute('aria-expanded', String(!expanded));
+    navMenu.classList.toggle('show');
+  });
+
+  // Optional: toggle on Enter key for accessibility
+  menuToggle.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      menuToggle.click();
+    }
+  });
+</script>
+</body>
+</html>
